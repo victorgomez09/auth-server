@@ -4,40 +4,34 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/ESMO-ENTERPRISE/auth-server/api"
-	"github.com/ESMO-ENTERPRISE/auth-server/internal"
 	"github.com/ESMO-ENTERPRISE/auth-server/providers"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
-	err := godotenv.Load(".env")
+	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
 
-	// call oauth2 init functions
-	internal.InitOauth2()
-
-	// Init github provider
 	providers.InitGithubFlow()
 
-	echoServer := echo.New()
-	echoServer.HideBanner = true
+	app := echo.New()
 
-	// Routes
-	echoServer.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
+	app.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	}))
+
+	app.GET("/", func(c echo.Context) error {
+		return c.JSON(http.StatusOK, map[string]string{"message": "Hello, World!"})
 	})
-	echoServer.POST("/credentials", api.CreateCredentials)
-	echoServer.GET("/token", api.GetToken)
-	echoServer.GET("/protected", func(c echo.Context) error {
-		return c.String(http.StatusOK, "/protected")
-	}, internal.ValidateToken)
 
-	echoServer.POST("/github-login", providers.GithubLoginHandler)
-	echoServer.POST(providers.GithubCallbackEndpoint, providers.GithubCallbackHandler)
+	githubRoutes := app.Group("/github")
+	githubRoutes.GET("", providers.GithubLoginHandler)
+	githubRoutes.GET("/callback", providers.GithubCallbackHandler)
 
-	echoServer.Logger.Fatal(echoServer.Start(":1209"))
+	log.Fatal(app.Start(":3000"))
 }

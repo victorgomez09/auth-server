@@ -1,0 +1,11 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "name": "auth-server",
+            "database": "\\\\wsl.localhost\\Debian\\home\\viti\\projects\\auth-server\\data.db"
+        }
+    ],
+    "sqltools.useNodeRuntime": true
+}

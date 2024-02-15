@@ -10,12 +10,13 @@ import (
 	"time"
 
 	"github.com/ESMO-ENTERPRISE/auth-server/utils"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/github"
 )
 
-var GithubAdress = "http://localhost:1209"
+var GithubAdress = "http://localhost:3000"
 var GithubCallbackEndpoint = "/github/callback/"
 var lf *loginFlow
 
@@ -57,10 +58,11 @@ func GithubLoginHandler(c echo.Context) error {
 		Secure:   c.Request().TLS != nil,
 		HttpOnly: true,
 	}
+	fmt.Print(cookie)
 	c.SetCookie(cookie)
 
 	redirectUrl := lf.config.AuthCodeURL(state)
-	return c.Redirect(http.StatusMovedPermanently, redirectUrl)
+	return c.Redirect(http.StatusTemporaryRedirect, redirectUrl)
 }
 
 func GithubCallbackHandler(c echo.Context) error {
@@ -92,5 +94,24 @@ func GithubCallbackHandler(c echo.Context) error {
 	c.Response().Header().Set("Content-type", "application/json")
 	fmt.Println(string(userInfo))
 
-	return c.JSON(http.StatusOK, tok.AccessToken)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"user": userInfo,
+		"exp":  time.Now().Add(time.Hour * 24).Unix(),
+	})
+
+	tokenString, err := token.SignedString([]byte("secret-key"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	c.SetCookie(&http.Cookie{
+		Name:     "token",
+		Value:    tokenString,
+		Path:     "/",
+		MaxAge:   int(time.Hour.Seconds()),
+		Secure:   c.Request().TLS != nil,
+		HttpOnly: true,
+	})
+
+	return c.Redirect(http.StatusPermanentRedirect, "http://localhost:5173")
 }
