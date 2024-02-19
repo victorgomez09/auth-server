@@ -113,5 +113,9 @@ func GithubCallbackHandler(c echo.Context) error {
 		HttpOnly: true,
 	})
 
-	return c.Redirect(http.StatusPermanentRedirect, "http://localhost:5173")
+	c.Redirect(http.StatusPermanentRedirect, "https://5173-victorgomez0-authserver-gqsn28seh6w.ws-eu108.gitpod.io")
+
+	return c.JSON(http.StatusOK, map[string]string{
+		"message": tokenString,
+	})
 }

@@ -1,3 +1,3 @@
 export const API_CONSTANTS = {
-  URL: "http://localhost:3000",
+  URL: "https://3000-victorgomez0-authserver-gqsn28seh6w.ws-eu108.gitpod.io",
 };
