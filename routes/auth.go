@@ -11,7 +11,7 @@ func AuthRoutes(app *echo.Echo) {
 
 	authRoutes := app.Group("/auth")
 	authRoutes.POST("/register", service.RegisterWithEmailAndPassword)
-	authRoutes.POST("/login")
+	authRoutes.POST("/login", service.LoginWithEmailAndPassword)
 	authRoutes.POST("/logout")
 	authRoutes.POST("/refresh")
 	reAuthRoutes := authRoutes.Group("/reAuthenticate")
