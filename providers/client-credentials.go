@@ -42,4 +42,5 @@ func ClientCredentialsLoginHandler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid_state"})
 	}
 
+	return nil
 }

@@ -1,11 +1,21 @@
 {
-    "sqltools.connections": [
-        {
-            "previewLimit": 50,
-            "driver": "SQLite",
-            "name": "auth-server",
-            "database": "\\\\wsl.localhost\\Debian\\home\\viti\\projects\\auth-server\\data.db"
-        }
-    ],
-    "sqltools.useNodeRuntime": true
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "driver": "SQLite",
+      "name": "auth-server",
+      "database": "\\\\wsl.localhost\\Debian\\home\\viti\\projects\\auth-server\\data.db"
+    },
+    {
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "name": "auth",
+      "database": "auth_service",
+      "username": "postgres",
+      "password": "postgres"
+    }
+  ],
+  "sqltools.useNodeRuntime": true
 }

@@ -2,19 +2,18 @@ package routes
 
 import (
 	"github.com/ESMO-ENTERPRISE/auth-server/services"
-	"github.com/labstack/echo/v4"
+	"github.com/gofiber/fiber/v2"
 )
 
-var service *services.Auth
-
-func AuthRoutes(app *echo.Echo) {
+func AuthRoutes(service *services.Auth, app *fiber.App) {
 
 	authRoutes := app.Group("/auth")
-	authRoutes.POST("/register", service.RegisterWithEmailAndPassword)
-	authRoutes.POST("/login", service.LoginWithEmailAndPassword)
-	authRoutes.POST("/logout")
-	authRoutes.POST("/refresh")
-	reAuthRoutes := authRoutes.Group("/reAuthenticate")
-	reAuthRoutes.POST("/password")
-	reAuthRoutes.POST("/passkey")
+	authRoutes.Post("/register", service.RegisterWithEmailAndPassword)
+	authRoutes.Post("/login", service.LoginWithEmailAndPassword)
+	// authRoutes.Post("/logout")
+	// authRoutes.Post("/refresh")
+
+	// reAuthRoutes := authRoutes.Group("/reAuthenticate")
+	// reAuthRoutes.Post("/password")
+	// reAuthRoutes.Post("/passkey")
 }

@@ -2,6 +2,7 @@ package token
 
 import (
 	"encoding/base64"
+	"fmt"
 	"os"
 	"time"
 
@@ -17,11 +18,12 @@ type AccessToken struct {
 }
 
 // Create is a function that is used to create the access token
-func (a *AccessToken) Create(refreshTokenUUID string) (tokenDetails *Details, err error) {
+func (a *AccessToken) Create() (tokenDetails *Details, err error) {
 	now := time.Now().UTC()
 
 	tokenUUID, err := uuid.NewUUID()
 	if err != nil {
+		fmt.Println("error generating uuid")
 		return nil, err
 	}
 
@@ -32,6 +34,7 @@ func (a *AccessToken) Create(refreshTokenUUID string) (tokenDetails *Details, er
 
 	duration, err := time.ParseDuration(os.Getenv("TOKEN_EXPIRATION_TIME"))
 	if err != nil {
+		fmt.Println("error parsing expiration time")
 		return nil, err
 	}
 
@@ -41,11 +44,15 @@ func (a *AccessToken) Create(refreshTokenUUID string) (tokenDetails *Details, er
 
 	decodedPrivateKey, err := base64.StdEncoding.DecodeString(os.Getenv("ACCESS_TOKEN_PRIVATE_KEY"))
 	if err != nil {
+		fmt.Println("error decoding access token private key")
 		return nil, err
 	}
 
+	fmt.Print(decodedPrivateKey)
 	key, err := jwt.ParseRSAPrivateKeyFromPEM(decodedPrivateKey)
 	if err != nil {
+		fmt.Println("error parsing access token private key")
+		fmt.Println(err)
 		return nil, err
 	}
 
@@ -58,6 +65,7 @@ func (a *AccessToken) Create(refreshTokenUUID string) (tokenDetails *Details, er
 
 	*tokenDetails.Token, err = jwt.NewWithClaims(jwt.SigningMethodRS256, claims).SignedString(key)
 	if err != nil {
+		fmt.Println("error generating token")
 		return nil, err
 	}
 

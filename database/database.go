@@ -25,19 +25,10 @@ func (c *Connector) InitDatabase() {
 }
 
 func (c *Connector) MigrateDatabase() {
-	migrations := []interface{}{
-		models.Client{},
-		models.Scope{},
-	}
-
-	if len(migrations) == 0 {
-		fmt.Errorf(" ❌ No items to migrate ! ")
-		os.Exit(0)
-	}
 
 	c.DB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"")
 
-	err := c.DB.AutoMigrate(migrations...)
+	err := c.DB.AutoMigrate(&models.User{})
 	if err != nil {
 		fmt.Errorf(err.Error())
 	}

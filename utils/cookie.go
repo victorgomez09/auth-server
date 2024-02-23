@@ -1,19 +1,20 @@
 package utils
 
 import (
-	"net/http"
+	"os"
+	"strconv"
 
 	"github.com/ESMO-ENTERPRISE/auth-server/database"
 	"github.com/ESMO-ENTERPRISE/auth-server/models"
 	"github.com/ESMO-ENTERPRISE/auth-server/token"
-	"github.com/labstack/echo/v4"
+	"github.com/gofiber/fiber/v2"
 )
 
-func GenerateCookie(user *models.User, c echo.Context, conn *database.Connector) error {
-	refreshTokenUtil := token.RefreshToken{
-		Conn:   conn,
-		UserID: user.ID,
-	}
+func GenerateCookie(user *models.User, c *fiber.Ctx, conn *database.Connector) error {
+	// refreshTokenUtil := token.RefreshToken{
+	// 	Conn:   conn,
+	// 	UserID: user.ID,
+	// }
 	accessTokenUtil := token.AccessToken{
 		Conn:   conn,
 		UserID: user.ID,
@@ -22,10 +23,10 @@ func GenerateCookie(user *models.User, c echo.Context, conn *database.Connector)
 		Conn: conn,
 	}
 
-	refreshToken, errRefreshToken := refreshTokenUtil.Create()
-	if errRefreshToken != nil {
-		return errRefreshToken
-	}
+	// refreshToken, errRefreshToken := refreshTokenUtil.Create()
+	// if errRefreshToken != nil {
+	// 	return errRefreshToken
+	// }
 
 	accessToken, errAccessToken := accessTokenUtil.Create()
 	if errAccessToken != nil {
@@ -37,40 +38,35 @@ func GenerateCookie(user *models.User, c echo.Context, conn *database.Connector)
 		return errSessionToken
 	}
 
-	c.Cookie(&http.Cookie{
-		Name:  "access_token",
-		Value: *accessToken.Token,
-		Path:  "/",
-		// MaxAge: strconv.Atoi(os.Getenv("TOKEN_EXPIRATION_TIME")) * 60,
-		Secure:   true,
-		HttpOnly: false,
-		// Name:     "access_token",
-		// Value:    *accessTokenD.Token,
-		// Path:     "/",
-		// MaxAge:   env.AccessTokenMaxAge * 60,
-		// Secure:   false,
-		// HTTPOnly: false,
-		// Domain:   "localhost",
-	})
+	maxAge, _ := strconv.Atoi(os.Getenv("TOKEN_EXPIRATION_TIME"))
+	// c.Cookie(&fiber.Cookie{
+	// 	Name:     "refresh_token",
+	// 	Value:    *refreshToken.Token,
+	// 	Path:     "/",
+	// 	MaxAge:   maxAge * 60,
+	// 	Secure:   true,
+	// 	HTTPOnly: false,
+	// 	Domain:   "/",
+	// })
 
 	c.Cookie(&fiber.Cookie{
-		Name:     "refresh_token",
-		Value:    *refreshTokenD.Token,
+		Name:     "access_token",
+		Value:    *accessToken.Token,
 		Path:     "/",
-		MaxAge:   env.RefreshTokenMaxAge * 60,
-		Secure:   false,
-		HTTPOnly: true,
-		Domain:   "localhost",
+		MaxAge:   maxAge * 60,
+		Secure:   true,
+		HTTPOnly: false,
+		Domain:   "/",
 	})
 
 	c.Cookie(&fiber.Cookie{
 		Name:     "session",
-		Value:    *sessionTokenD.Token,
+		Value:    *sessionToken.Token,
 		Path:     "/",
-		MaxAge:   env.RefreshTokenMaxAge * 60,
+		MaxAge:   maxAge * 60,
 		Secure:   false,
 		HTTPOnly: false,
-		Domain:   "localhost",
+		Domain:   "/",
 	})
 
 	return nil

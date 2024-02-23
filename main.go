@@ -3,12 +3,15 @@ package main
 import (
 	"log"
 	"os"
+	"time"
 
 	"github.com/ESMO-ENTERPRISE/auth-server/database"
 	"github.com/ESMO-ENTERPRISE/auth-server/routes"
+	"github.com/ESMO-ENTERPRISE/auth-server/services"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/joho/godotenv"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 )
 
 var con database.Connector
@@ -24,16 +27,35 @@ func main() {
 	con.MigrateDatabase()
 
 	// Http server
-	app := echo.New()
-	app.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{os.Getenv("FRONTEND_URL")},
-		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	app := fiber.New()
+	app.Use(cors.New(cors.Config{
+		AllowHeaders:     "Origin, Content-Type, Accept",
+		AllowOrigins:     os.Getenv("FRONTEND_URL"),
 		AllowCredentials: true,
-		AllowMethods:     []string{"GET", "POST", "DELETE", "PATCH"},
+		AllowMethods:     "GET, POST, DELETE, PATCH",
+	}))
+	app.Use(limiter.New(limiter.Config{
+		Max:        100,
+		Expiration: 1 * time.Minute,
+		KeyGenerator: func(c *fiber.Ctx) string {
+			return c.IP()
+		},
+		LimitReached: func(c *fiber.Ctx) error {
+			return c.SendStatus(fiber.StatusTooManyRequests)
+		},
+		SkipFailedRequests:     false,
+		SkipSuccessfulRequests: false,
+		LimiterMiddleware:      limiter.SlidingWindow{},
+		// Storage:                conn.Ratelimter,
 	}))
 
-	routes.AuthRoutes(app)
+	// Setup routes
+	authService := services.Auth{
+		Conn: &con,
+	}
+
+	routes.AuthRoutes(&authService, app)
 
 	// Start server
-	log.Fatal(app.Start(":3000"))
+	log.Fatal(app.Listen(":3000"))
 }
