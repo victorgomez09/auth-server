@@ -1,8 +1,10 @@
 package token
 
 import (
-	"encoding/base64"
+	"crypto/rand"
+	"crypto/rsa"
 	"fmt"
+	"log"
 	"os"
 	"time"
 
@@ -17,86 +19,94 @@ type AccessToken struct {
 	UserID uuid.UUID
 }
 
-// Create is a function that is used to create the access token
-func (a *AccessToken) Create() (tokenDetails *Details, err error) {
-	now := time.Now().UTC()
+// const (
+// 	privKeyPath = "keys/app.rsa"     // openssl genrsa -out app.rsa keysize
+// 	pubKeyPath  = "keys/app.rsa.pub" // openssl rsa -in app.rsa -pubout > app.rsa.pub
+// )
 
-	tokenUUID, err := uuid.NewUUID()
+// var (
+// 	verifyKey *rsa.PublicKey
+// 	signKey   *rsa.PrivateKey
+// )
+
+var privateKey *rsa.PrivateKey
+
+func InitTokenService() {
+	// signBytes, err := ioutil.ReadFile(privKeyPath)
+	// if err != nil {
+	// 	fmt.Println("Error getting private key")
+	// }
+
+	// signKey, err = jwt.ParseRSAPrivateKeyFromPEM(signBytes)
+	// if err != nil {
+	// 	fmt.Println("Error parsing privat  key")
+	// }
+
+	// verifyBytes, err := ioutil.ReadFile(pubKeyPath)
+	// if err != nil {
+	// 	fmt.Println("Error getting public key")
+	// }
+
+	// verifyKey, err = jwt.ParseRSAPublicKeyFromPEM(verifyBytes)
+	// if err != nil {
+	// 	fmt.Println("Error verifying keys")
+	// }
+
+	// Just as a demo, generate a new private/public key pair on each run. See note above.
+	rng := rand.Reader
+	var err error
+	privateKey, err = rsa.GenerateKey(rng, 2048)
 	if err != nil {
-		fmt.Println("error generating uuid")
-		return nil, err
+		log.Fatalf("rsa.GenerateKey: %v", err)
 	}
+}
 
-	tokenDetails = &Details{
-		ExpiresIn: new(int64),
-		Token:     new(string),
-	}
+// Create is a function that is used to create the access token
+func (a *AccessToken) Create() (string, error) {
+	// t := jwt.New(jwt.GetSigningMethod(jwt.SigningMethodRS512.Name))
+
+	// duration, err := time.ParseDuration(os.Getenv("TOKEN_EXPIRATION_TIME"))
+	// if err != nil {
+	// 	fmt.Println("error parsing expiration time")
+	// 	return "", err
+	// }
+
+	// // set our claims
+	// t.Claims = &dtos.TokenDto{
+	// 	&jwt.StandardClaims{
+	// 		// set the expire time
+	// 		// see http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4.1.4
+	// 		ExpiresAt: time.Now().Add(duration).Unix(),
+	// 	},
+	// 	"token_type",
+	// 	a.UserID.String(),
+	// 	[]string{"scope1", "scope2"},
+	// }
+
+	// return t.SignedString(signKey)
 
 	duration, err := time.ParseDuration(os.Getenv("TOKEN_EXPIRATION_TIME"))
 	if err != nil {
 		fmt.Println("error parsing expiration time")
-		return nil, err
+		return "", err
 	}
 
-	*tokenDetails.ExpiresIn = now.Add(duration).Unix()
-	tokenDetails.TokenUUID = tokenUUID.String()
-	tokenDetails.UserID = a.UserID.String()
+	// Create the Claims
+	claims := jwt.MapClaims{
+		"id":     a.UserID,
+		"scopes": true,
+		"exp":    time.Now().Add(duration * 72).Unix(),
+	}
 
-	decodedPrivateKey, err := base64.StdEncoding.DecodeString(os.Getenv("ACCESS_TOKEN_PRIVATE_KEY"))
+	// Create token
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+
+	// Generate encoded token and send it as response.
+	t, err := token.SignedString(privateKey)
 	if err != nil {
-		fmt.Println("error decoding access token private key")
-		return nil, err
+		log.Printf("token.SignedString: %v", err)
+		return "", err
 	}
 
-	fmt.Print(decodedPrivateKey)
-	key, err := jwt.ParseRSAPrivateKeyFromPEM(decodedPrivateKey)
-	if err != nil {
-		fmt.Println("error parsing access token private key")
-		fmt.Println(err)
-		return nil, err
-	}
-
-	claims := make(jwt.MapClaims)
-	claims["sub"] = a.UserID.String()
-	claims["token_uuid"] = tokenDetails.TokenUUID
-	claims["exp"] = *tokenDetails.ExpiresIn
-	claims["iat"] = now.Unix()
-	claims["nbf"] = now.Unix()
-
-	*tokenDetails.Token, err = jwt.NewWithClaims(jwt.SigningMethodRS256, claims).SignedString(key)
-	if err != nil {
-		fmt.Println("error generating token")
-		return nil, err
-	}
-
-	// ctx := context.TODO()
-
-	// detailsStr := a.Conn.R.Session.Get(ctx, refreshTokenUUID).Val()
-	// if detailsStr != "" {
-	// 	var details schemas.RefreshTokenDetails
-	// 	err := json.Unmarshal([]byte(detailsStr), &details)
-	// 	if err == nil {
-	// 		a.Conn.R.Session.Del(ctx, details.AccessTokenUUID)
-	// 	}
-	// }
-
-	// tokenVal, err := json.Marshal(schemas.RefreshTokenDetails{
-	// 	UserID:          a.UserID.String(),
-	// 	AccessTokenUUID: tokenDetails.TokenUUID,
-	// })
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// ttl := a.Conn.R.Session.TTL(ctx, refreshTokenUUID).Val()
-	// if ttl.Seconds() < 0 {
-	// 	ttl = 0
-	// }
-	// err = a.Conn.R.Session.Set(ctx, refreshTokenUUID, string(tokenVal), ttl).Err()
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// err = a.Conn.R.Session.Set(ctx, tokenDetails.TokenUUID, a.UserID.String(), time.Unix(*tokenDetails.ExpiresIn, 0).Sub(now)).Err()
-	return tokenDetails, err
+	return t, nil
 }

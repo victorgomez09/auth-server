@@ -2,11 +2,11 @@ package routes
 
 import (
 	"github.com/ESMO-ENTERPRISE/auth-server/providers"
-	"github.com/labstack/echo/v4"
+	"github.com/gofiber/fiber/v2"
 )
 
-func GithubRoutes(app *echo.Echo) {
+func GithubRoutes(app *fiber.App) {
 	githubRoutes := app.Group("/github")
-	githubRoutes.GET("/login", providers.GithubLoginHandler)
-	githubRoutes.GET("/callback", providers.GithubCallbackHandler)
+	githubRoutes.Get("/login", providers.GithubLoginHandler)
+	githubRoutes.Get("/callback", providers.GithubCallbackHandler)
 }

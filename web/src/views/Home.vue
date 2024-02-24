@@ -2,7 +2,7 @@
 import { API_CONSTANTS } from "../constants/index";
 
 const handleGithubLogin = () => {
-  window.location.href = `${API_CONSTANTS.URL}/github`;
+  window.location.href = `${API_CONSTANTS.URL}/github/login`;
 };
 </script>
 

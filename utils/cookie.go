@@ -51,7 +51,7 @@ func GenerateCookie(user *models.User, c *fiber.Ctx, conn *database.Connector) e
 
 	c.Cookie(&fiber.Cookie{
 		Name:     "access_token",
-		Value:    *accessToken.Token,
+		Value:    accessToken,
 		Path:     "/",
 		MaxAge:   maxAge * 60,
 		Secure:   true,

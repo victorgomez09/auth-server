@@ -6,8 +6,10 @@ import (
 	"time"
 
 	"github.com/ESMO-ENTERPRISE/auth-server/database"
+	"github.com/ESMO-ENTERPRISE/auth-server/providers"
 	"github.com/ESMO-ENTERPRISE/auth-server/routes"
 	"github.com/ESMO-ENTERPRISE/auth-server/services"
+	"github.com/ESMO-ENTERPRISE/auth-server/token"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
@@ -25,6 +27,9 @@ func main() {
 	// Load database
 	con.InitDatabase()
 	con.MigrateDatabase()
+
+	token.InitTokenService()
+	providers.InitGithubFlow()
 
 	// Http server
 	app := fiber.New()
@@ -55,6 +60,7 @@ func main() {
 	}
 
 	routes.AuthRoutes(&authService, app)
+	routes.GithubRoutes(app)
 
 	// Start server
 	log.Fatal(app.Listen(":3000"))

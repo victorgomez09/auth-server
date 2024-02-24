@@ -1,7 +1,7 @@
 package services
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/ESMO-ENTERPRISE/auth-server/database"
@@ -20,14 +20,14 @@ func (a *Auth) RegisterWithEmailAndPassword(c *fiber.Ctx) error {
 	u := new(dtos.RegisterPayload)
 
 	if err := c.BodyParser(&u); err != nil {
-		fmt.Errorf(err.Error())
+		log.Fatal(err.Error())
 
 		return c.Status(fiber.StatusBadRequest).JSON("bad request")
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 	if err != nil {
-		fmt.Errorf(err.Error())
+		log.Fatal(err.Error())
 		return c.JSON(http.StatusInternalServerError, "internal server error")
 	}
 
@@ -52,7 +52,7 @@ func (a *Auth) LoginWithEmailAndPassword(c *fiber.Ctx) error {
 	u := new(dtos.LoginPayload)
 
 	if err := c.BodyParser(&u); err != nil {
-		fmt.Errorf(err.Error())
+		log.Fatal(err.Error())
 
 		return c.Status(fiber.StatusBadRequest).JSON("bad request")
 	}

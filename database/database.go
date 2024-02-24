@@ -30,7 +30,7 @@ func (c *Connector) MigrateDatabase() {
 
 	err := c.DB.AutoMigrate(&models.User{})
 	if err != nil {
-		fmt.Errorf(err.Error())
+		log.Fatal(err.Error())
 	}
 
 	fmt.Print("\n\n ✅ All schema changes have been migrated !")

@@ -17,5 +17,6 @@
       "password": "postgres"
     }
   ],
-  "sqltools.useNodeRuntime": true
+  "sqltools.useNodeRuntime": true,
+  "remote.autoForwardPortsFallback": 0
 }
