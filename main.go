@@ -58,9 +58,17 @@ func main() {
 	authService := services.Auth{
 		Conn: &con,
 	}
+	clientService := services.Client{
+		Conn: &con,
+	}
 
 	routes.AuthRoutes(&authService, app)
 	routes.GithubRoutes(app)
+
+	// JWT Middleware
+	app.Use(token.VerifyToken())
+
+	routes.ClientRoutes(&clientService, app)
 
 	// Start server
 	log.Fatal(app.Listen(":3000"))

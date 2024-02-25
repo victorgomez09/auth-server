@@ -13,12 +13,12 @@ type Client struct {
 	ClientID     string
 	ClientSecret string
 	RedirectURI  string
-	Scopes       []Scope
+	Scopes       []Scope `gorm:"foreignKey:ClientRefer"`
 }
 
 type Scope struct {
 	gorm.Model
 	ID          uuid.UUID `gorm:"primaryKey,type:uuid;default:uuid_generate_v4()"`
 	Name        string
-	ClientRefer uuid.UUID
+	ClientRefer uuid.UUID `gorm:"foreignKey:ClientRefer"`
 }

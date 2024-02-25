@@ -1,10 +1,13 @@
 package routes
 
-import "github.com/gofiber/fiber"
+import (
+	"github.com/ESMO-ENTERPRISE/auth-server/services"
+	"github.com/gofiber/fiber/v2"
+)
 
-func ClientRoutes(app *fiber.App) {
+func ClientRoutes(service *services.Client, app *fiber.App) {
 	clientRoutes := app.Group("/client")
 
-	clientRoutes.Post("/register", services.Client.Register)
-	clientRoutes.Post("/login", services.Client.Login)
+	clientRoutes.Post("/create", service.CreateClient)
+	// clientRoutes.Post("/login", services.Client.Login)
 }
