@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+<script setup lang="ts">
 import { API_CONSTANTS } from "../constants/index";
 
 const handleGithubLogin = () => {
@@ -7,19 +7,30 @@ const handleGithubLogin = () => {
 </script>
 
 <template>
-  <div class="hero min-h-screen bg-base-200">
-    <div class="hero-content w-full lg:flex-row-reverse">
-      <div class="card w-6/12 shadow-lg bg-base-100">
-        <div class="card-body">
-          <form class="">
-            <h2 class="card-title justify-center">Login</h2>
+  <div class="hero min-h-screen bg-base-200 w-full h-full">
+    <div class="hero-content lg:flex-row-reverse w-full h-full">
+      <div class="card shadow-md bg-base-100 w-6/12 h-full">
+        <div class="card-body w-full h-full max-h-0">
+          <form class="overflow-auto">
+            <h2 class="card-title justify-center">Register</h2>
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text">Name</span>
+              </label>
+              <input
+                type="text"
+                placeholder="John Doe"
+                class="input input-bordered"
+                required
+              />
+            </div>
             <div class="form-control">
               <label class="label">
                 <span class="label-text">Email</span>
               </label>
               <input
                 type="email"
-                placeholder="email"
+                placeholder="johndoe@gmail.com"
                 class="input input-bordered"
                 required
               />
@@ -30,15 +41,10 @@ const handleGithubLogin = () => {
               </label>
               <input
                 type="password"
-                placeholder="password"
+                placeholder="*********"
                 class="input input-bordered"
                 required
               />
-              <label class="label">
-                <a href="#" class="label-text-alt link link-hover"
-                  >Forgot password?</a
-                >
-              </label>
             </div>
             <div class="form-control mt-6">
               <button class="btn btn-primary">Login</button>

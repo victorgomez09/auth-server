@@ -65,7 +65,7 @@ func main() {
 	routes.AuthRoutes(&authService, app)
 	routes.GithubRoutes(app)
 
-	// JWT Middleware
+	// JWT Middleware, from here all routes below must have an authentication token
 	app.Use(token.VerifyToken())
 
 	routes.ClientRoutes(&clientService, app)
