@@ -110,12 +110,5 @@ func (us *UserService) AssignateUserToClient(c *fiber.Ctx) error {
 		clients = append(clients, client)
 	}
 
-	return c.Status(fiber.StatusOK).JSON(dtos.UserClientResponse{
-		User: dtos.UserResponse{
-			ID:      user.UserID,
-			Name:    user.Name,
-			Email:   user.Email,
-			Clients: clients,
-		},
-	})
+	return c.SendStatus(fiber.StatusOK)
 }
