@@ -33,10 +33,10 @@ func (s *SessionToken) Create(user models.User) (tokenDetails *Details, err erro
 	}
 	*tokenDetails.ExpiresIn = now.Add(duration).Unix()
 	tokenDetails.TokenUUID = uid.String()
-	tokenDetails.UserID = user.ID.String()
+	tokenDetails.UserID = user.UserID.String()
 
 	claims := make(jwt.MapClaims)
-	claims["sub"] = user.ID
+	claims["sub"] = user.UserID
 	claims["token_uuid"] = tokenDetails.TokenUUID
 	claims["exp"] = tokenDetails.ExpiresIn
 	claims["iat"] = now.Unix()

@@ -9,8 +9,6 @@ import (
 	"time"
 
 	"github.com/ESMO-ENTERPRISE/auth-server/database"
-	jwtware "github.com/gofiber/contrib/jwt"
-	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 )
@@ -21,12 +19,12 @@ type AccessToken struct {
 	UserID uuid.UUID
 }
 
-var privateKey *rsa.PrivateKey
+var PrivateKey *rsa.PrivateKey
 
 func InitTokenService() {
 	rng := rand.Reader
 	var err error
-	privateKey, err = rsa.GenerateKey(rng, 2048)
+	PrivateKey, err = rsa.GenerateKey(rng, 2048)
 	if err != nil {
 		log.Fatalf("rsa.GenerateKey: %v", err)
 	}
@@ -51,20 +49,11 @@ func (a *AccessToken) Create() (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 
 	// Generate encoded token and send it as response.
-	t, err := token.SignedString(privateKey)
+	t, err := token.SignedString(PrivateKey)
 	if err != nil {
 		log.Printf("token.SignedString: %v", err)
 		return "", err
 	}
 
 	return t, nil
-}
-
-func VerifyToken() fiber.Handler {
-	return jwtware.New(jwtware.Config{
-		SigningKey: jwtware.SigningKey{
-			JWTAlg: jwtware.RS256,
-			Key:    privateKey.Public(),
-		},
-	})
 }

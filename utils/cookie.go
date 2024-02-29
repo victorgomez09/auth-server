@@ -17,7 +17,7 @@ func GenerateCookie(user *models.User, c *fiber.Ctx, conn *database.Connector) e
 	// }
 	accessTokenUtil := token.AccessToken{
 		Conn:   conn,
-		UserID: user.ID,
+		UserID: user.UserID,
 	}
 	sessionTokenUtil := token.SessionToken{
 		Conn: conn,

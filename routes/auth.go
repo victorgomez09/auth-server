@@ -5,7 +5,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func AuthRoutes(service *services.Auth, app *fiber.App) {
+func AuthRoutes(service *services.AuthService, app *fiber.App) {
 
 	authRoutes := app.Group("/auth")
 	authRoutes.Post("/register", service.RegisterWithEmailAndPassword)

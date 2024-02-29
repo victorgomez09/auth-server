@@ -10,6 +10,7 @@ import (
 	"github.com/ESMO-ENTERPRISE/auth-server/routes"
 	"github.com/ESMO-ENTERPRISE/auth-server/services"
 	"github.com/ESMO-ENTERPRISE/auth-server/token"
+	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
@@ -26,7 +27,7 @@ func main() {
 
 	// Load database
 	con.InitDatabase()
-	con.MigrateDatabase()
+	// con.MigrateDatabase()
 
 	token.InitTokenService()
 	providers.InitGithubFlow()
@@ -55,10 +56,10 @@ func main() {
 	}))
 
 	// Setup routes
-	authService := services.Auth{
+	authService := services.AuthService{
 		Conn: &con,
 	}
-	clientService := services.Client{
+	clientService := services.ClientService{
 		Conn: &con,
 	}
 
@@ -66,7 +67,12 @@ func main() {
 	routes.GithubRoutes(app)
 
 	// JWT Middleware, from here all routes below must have an authentication token
-	app.Use(token.VerifyToken())
+	app.Use(jwtware.New(jwtware.Config{
+		SigningKey: jwtware.SigningKey{
+			JWTAlg: jwtware.RS256,
+			Key:    token.PrivateKey.Public(),
+		},
+	}))
 
 	routes.ClientRoutes(&clientService, app)
 
