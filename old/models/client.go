@@ -7,5 +7,6 @@ type Client struct {
 	ClientID     string
 	ClientSecret string
 	RedirectURI  string
+	Enabled      bool
 	Users        []User
 }

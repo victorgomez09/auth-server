@@ -1,0 +1,43 @@
+name: GoFmt
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  gofmt:
+    name: Run gofmt on Go modules
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0 # Fetch all history for all tags and branches
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: '1.21' # Use the version of Go your project requires
+
+    - name: Run gofmt on auth module
+      run: |
+        cd auth
+        go fmt ./...
+
+    - name: Run gofmt on resource module
+      run: |
+        cd resource
+        go fmt ./...
+
+    # Add commands for other modules if necessary
+
+    - name: Commit changes
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git add .
+        git diff --staged --quiet || git commit -m "Apply gofmt changes"
+        git remote set-url origin https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/miyuki-starmiya/go-oauth2-server.git
+        git push
